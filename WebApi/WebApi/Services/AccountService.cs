@@ -13,4 +13,20 @@ public class AccountService : IAccountService
         return null;
     }
     
+    public void CreateOrUpdateAccount(string accountId, decimal amount)
+    {
+        if(accounts.ContainsKey(accountId))
+        {
+            accounts[accountId] += amount;
+        }
+        else
+        {
+            accounts.Add(accountId, amount);
+        }
+    }
+    
+    public void ResetAccounts()
+    {
+        accounts.Clear();
+    }
 }

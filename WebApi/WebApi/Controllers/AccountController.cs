@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Dto;
 using WebApi.Services;
 
 namespace WebApi.Controllers;
@@ -23,6 +24,22 @@ public class AccountController : ControllerBase
             return Ok(balance.Value);
         }
         return NotFound(0);
+    }
+    
+    [HttpPost("event")]
+    public IActionResult Event([FromBody] EventDto transaction)
+    {
+        switch (transaction.Type)
+        {
+            case "deposit":
+                if(transaction.Destination == null)
+                    return BadRequest();
+                _accountService.CreateOrUpdateAccount(transaction.Destination, transaction.Amount);
+                var newBalance = _accountService.GetBalance(transaction.Destination);
+                return Created("", new { destination = new { id = transaction.Destination, balance = newBalance } });
+            default:
+                return BadRequest();
+        }
     }
     
 }
