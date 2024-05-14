@@ -25,6 +25,16 @@ public class AccountService : IAccountService
         }
     }
     
+    public bool Withdraw(string accountId, decimal amount)
+    {
+        if(accounts.ContainsKey(accountId) && accounts[accountId] >= amount)
+        {
+            accounts[accountId] -= amount;
+            return true;
+        }
+        return false;
+    }
+    
     public void ResetAccounts()
     {
         accounts.Clear();

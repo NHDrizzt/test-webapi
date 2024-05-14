@@ -67,6 +67,46 @@ public class IntegrationTest: IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.Equal("{\"destination\":{\"id\":\"100\",\"balance\":20}}", await response.Content.ReadAsStringAsync());
     }
+    
+    [Theory(DisplayName = "Testing if route /event returns 201 with the correct body when withdraw is successful")]
+    [InlineData("/event", "{\"type\":\"deposit\",\"destination\":\"100\",\"amount\":10}", 
+        "{\"type\":\"withdraw\",\"origin\":\"100\",\"amount\":5}")]
+    public async Task Test5(string url, string depositBody, string withdrawBody)
+    {
+        // Deposit
+        var depositContent = new StringContent(depositBody, Encoding.UTF8, "application/json");
+        var response = await _clientTest.PostAsync(url, depositContent);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Equal("{\"destination\":{\"id\":\"100\",\"balance\":10}}", await response.Content.ReadAsStringAsync());
+
+        // Withdraw
+        var withdrawContent = new StringContent(withdrawBody, Encoding.UTF8, "application/json");
+        response = await _clientTest.PostAsync(url, withdrawContent);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Equal("{\"origin\":{\"id\":\"100\",\"balance\":5}}", await response.Content.ReadAsStringAsync());
+    }
+    
+    [Theory(DisplayName = "Testing if route /event returns 404 when withdraw is unsuccessful")]
+    [InlineData("/event", "{\"type\":\"withdraw\",\"origin\":\"100\",\"amount\":5}")]
+    public async Task Test6(string url, string body)
+    {
+        var content = new StringContent(body, Encoding.UTF8, "application/json");
+        var response = await _clientTest.PostAsync(url, content);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    
+    [Theory(DisplayName = "Testing if route /event returns 400 when withdraw is missing origin")]
+    [InlineData("/event", "{\"type\":\"withdraw\",\"amount\":5}")]
+    public async Task Test7(string url, string body)
+    {
+        var content = new StringContent(body, Encoding.UTF8, "application/json");
+        var response = await _clientTest.PostAsync(url, content);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    
+    
+    
+
 
     
 }

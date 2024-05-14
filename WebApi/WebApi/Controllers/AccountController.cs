@@ -37,6 +37,15 @@ public class AccountController : ControllerBase
                 _accountService.CreateOrUpdateAccount(transaction.Destination, transaction.Amount);
                 var newBalance = _accountService.GetBalance(transaction.Destination);
                 return Created("", new { destination = new { id = transaction.Destination, balance = newBalance } });
+            case "withdraw":
+                if(transaction.Origin == null)
+                    return BadRequest();
+                if (_accountService.Withdraw(transaction.Origin, transaction.Amount))
+                {
+                    newBalance = _accountService.GetBalance(transaction.Origin);
+                    return Created("", new { origin = new { id = transaction.Origin, balance = newBalance } });
+                }
+                return NotFound(0);
             default:
                 return BadRequest();
         }
