@@ -7,11 +7,11 @@ namespace TestApi.Test;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 
-public class IntegrationTest: IClassFixture<WebApplicationFactory<Program>>
+public class AccountIntegrationTest: IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient _clientTest;
     
-    public IntegrationTest(WebApplicationFactory<Program> factory)
+    public AccountIntegrationTest(WebApplicationFactory<Program> factory)
     {
         _clientTest = factory.CreateClient();
         var scopeFactory = factory.Services.GetService<IServiceScopeFactory>(); // Allows to create a new scope to resolve services of the app
