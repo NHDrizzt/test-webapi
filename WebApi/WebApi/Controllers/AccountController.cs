@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Services;
 
 namespace WebApi.Controllers;
 
@@ -6,11 +7,22 @@ namespace WebApi.Controllers;
 [Route("")]
 public class AccountController : ControllerBase
 {
-
-    [HttpGet("/balance")]
-    public IActionResult Get()
+    private readonly IAccountService _accountService;
+    
+    public AccountController(IAccountService accountService)
     {
-        return Ok("Hello World!");
+        _accountService = accountService;
+    }
+
+    [HttpGet("balance")]
+    public IActionResult Get([FromQuery] string accountId)
+    {
+        var balance = _accountService.GetBalance(accountId);
+        if (balance.HasValue)
+        {
+            return Ok(balance.Value);
+        }
+        return NotFound(0);
     }
     
 }
