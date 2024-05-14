@@ -35,6 +35,16 @@ public class AccountService : IAccountService
         return false;
     }
     
+    public bool Transfer(string origin, string destination, decimal amount)
+    {
+        if(Withdraw(origin, amount))
+        {
+            CreateOrUpdateAccount(destination, amount);
+            return true;
+        }
+        return false;
+    }
+    
     public void ResetAccounts()
     {
         accounts.Clear();

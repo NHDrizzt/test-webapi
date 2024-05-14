@@ -46,9 +46,26 @@ public class AccountController : ControllerBase
                     return Created("", new { origin = new { id = transaction.Origin, balance = newBalance } });
                 }
                 return NotFound(0);
+            case "transfer":
+                if(transaction.Origin == null || transaction.Destination == null)
+                    return BadRequest();
+                if (_accountService.Transfer(transaction.Origin, transaction.Destination, transaction.Amount))
+                {
+                    var originBalance = _accountService.GetBalance(transaction.Origin);
+                    var destinationBalance = _accountService.GetBalance(transaction.Destination);
+                    return Created("", new { origin = new { id = transaction.Origin, balance = originBalance }, destination = new { id = transaction.Destination, balance = destinationBalance } });
+                }
+                return NotFound(0);
             default:
                 return BadRequest();
         }
+    }
+    
+    [HttpPost("reset")]
+    public IActionResult Reset()
+    {
+        _accountService.ResetAccounts();
+        return Ok();
     }
     
 }
