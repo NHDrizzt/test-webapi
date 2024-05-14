@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Dto;
 using WebApi.Services;
@@ -16,7 +17,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("balance")]
-    public IActionResult Get([FromQuery] string accountId)
+    public IActionResult Get([FromQuery(Name = "account_id")] string accountId)
     {
         var balance = _accountService.GetBalance(accountId);
         if (balance.HasValue)
@@ -33,13 +34,13 @@ public class AccountController : ControllerBase
         {
             case "deposit":
                 if(transaction.Destination == null)
-                    return BadRequest();
+                    return BadRequest(new { Error = "Destination account is required." });
                 _accountService.CreateOrUpdateAccount(transaction.Destination, transaction.Amount);
                 var newBalance = _accountService.GetBalance(transaction.Destination);
                 return Created("", new { destination = new { id = transaction.Destination, balance = newBalance } });
             case "withdraw":
                 if(transaction.Origin == null)
-                    return BadRequest();
+                    return BadRequest(new { Error = "Origin account is required." });
                 if (_accountService.Withdraw(transaction.Origin, transaction.Amount))
                 {
                     newBalance = _accountService.GetBalance(transaction.Origin);
@@ -48,7 +49,7 @@ public class AccountController : ControllerBase
                 return NotFound(0);
             case "transfer":
                 if(transaction.Origin == null || transaction.Destination == null)
-                    return BadRequest();
+                    return BadRequest( new { Error = "Origin and destination accounts are required."} );
                 if (_accountService.Transfer(transaction.Origin, transaction.Destination, transaction.Amount))
                 {
                     var originBalance = _accountService.GetBalance(transaction.Origin);
@@ -65,7 +66,12 @@ public class AccountController : ControllerBase
     public IActionResult Reset()
     {
         _accountService.ResetAccounts();
-        return Ok();
+        var result = new ContentResult {
+            StatusCode = (int)HttpStatusCode.OK,
+            Content = "OK",
+            ContentType = "text/plain"
+        };
+        return result;
     }
     
 }
