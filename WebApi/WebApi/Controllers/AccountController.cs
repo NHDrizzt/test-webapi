@@ -17,6 +17,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("balance")]
+    [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
     public IActionResult Get([FromQuery(Name = "account_id")] string accountId)
     {
         var balance = _accountService.GetBalance(accountId);
@@ -28,6 +29,9 @@ public class AccountController : ControllerBase
     }
     
     [HttpPost("event")]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(object))] 
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(object))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult Event([FromBody] EventDto transaction)
     {
         switch (transaction.Type)
